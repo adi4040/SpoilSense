@@ -1,25 +1,28 @@
-import { useEffect } from "react";
-import { getStatus } from "../services/spoilageService";
+import DashboardLayout from "../layouts/DashboardLayout";
+import StatusCard from "../components/StatusCard";
+import SpoilageCard from "../components/SpoilageCard";
 
 const Dashboard = () => {
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await getStatus();
-        console.log("STATUS:", data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   return (
-    <div className="p-10">
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-    </div>
+    <DashboardLayout>
+      <h1 className="text-3xl font-bold text-white mb-6">
+        SpoilSense Dashboard
+      </h1>
+
+      <div className="grid grid-cols-3 gap-6">
+        <div className="bg-gradient-to-br from-teal-500/20 via-cyan-500/10 to-transparent backdrop-blur-lg border border-teal-400/20 rounded-2xl text-white p-6 hover:from-teal-500/30 transition duration-300 cursor-pointer">
+          <StatusCard />
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-500/20 via-pink-500/10 to-transparent backdrop-blur-lg border border-purple-400/20 rounded-2xl text-white p-6 hover:from-purple-500/30 transition duration-300 cursor-pointer">
+          <SpoilageCard />
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent backdrop-blur-lg border border-blue-400/20 rounded-2xl text-white p-6 hover:from-blue-500/30 transition duration-300 cursor-pointer">
+          Coming soon
+        </div>
+      </div>
+    </DashboardLayout>
   );
 };
 
