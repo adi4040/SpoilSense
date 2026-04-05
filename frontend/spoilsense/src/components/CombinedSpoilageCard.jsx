@@ -8,17 +8,26 @@ const CombinedSpoilageCard = () => {
   const [error, setError] = useState(null);
   const hasInitialized = useRef(false);
   const previousDataRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   const fetchCombinedData = async () => {
-    setError(null);
+    // Don't update state if component is unmounted
+    if (!isMountedRef.current) return;
+
     try {
+      setError(null);
+
       // Fetch backend data (required)
       let backendRes;
       try {
         backendRes = await getPrediction();
       } catch (err) {
         console.error("Backend prediction failed:", err);
-        throw new Error("Unable to fetch backend spoilage data");
+        if (isMountedRef.current) {
+          setError("Backend sensor data unavailable");
+          setLoading(false);
+        }
+        return; // Exit early if backend fails
       }
 
       // Fetch Jetson data (optional - if it fails, use fallback)
@@ -29,6 +38,8 @@ const CombinedSpoilageCard = () => {
         console.warn("Jetson Nano disconnected or unreachable:", err);
         jetsonRes = null;
       }
+
+      if (!isMountedRef.current) return;
 
       // Extract spoilage indices
       const backendIndex = backendRes.spoilage_index || 0;
@@ -65,20 +76,31 @@ const CombinedSpoilageCard = () => {
         hasInitialized.current = true;
       }
     } catch (err) {
-      console.error("Error fetching combined spoilage data:", err);
-      setError(err.message || "Unable to fetch spoilage data from backend.");
-      if (hasInitialized.current === false) {
-        setLoading(false);
-        hasInitialized.current = true;
+      console.error("Unexpected error fetching combined spoilage data:", err);
+      if (isMountedRef.current) {
+        setError("An unexpected error occurred");
+        if (hasInitialized.current === false) {
+          setLoading(false);
+          hasInitialized.current = true;
+        }
       }
     }
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
+
+    // Initial fetch
     fetchCombinedData();
-    // Poll every 15 seconds instead of 5 to reduce refresh frequency
+
+    // Poll every 15 seconds
     const interval = setInterval(fetchCombinedData, 15000);
-    return () => clearInterval(interval);
+
+    // Cleanup
+    return () => {
+      isMountedRef.current = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const getSpoilageColor = (index) => {
@@ -87,7 +109,7 @@ const CombinedSpoilageCard = () => {
     return { bg: "bg-red-500/10", border: "border-red-400/20", text: "text-red-300", label: "Spoiling" };
   };
 
-  const colors = data ? getSpoilageColor(data.averagedIndex) : {};
+  const colors = data ? getSpoilageColor(data.averagedIndex) : { bg: "bg-gray-500/5", border: "border-gray-400/20", text: "text-gray-300", label: "—" };
 
   if (loading) {
     return (
@@ -98,13 +120,13 @@ const CombinedSpoilageCard = () => {
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">Combined Spoilage Analysis</h2>
         <div className="flex items-start gap-2 bg-red-500/10 border border-red-400/20 rounded-lg p-3">
           <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-          <p className="text-red-300 text-sm">{error}</p>
+          <p className="text-red-300 text-sm">{error || "Unable to load spoilage data"}</p>
         </div>
       </div>
     );

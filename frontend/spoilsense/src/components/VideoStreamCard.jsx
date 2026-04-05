@@ -5,16 +5,23 @@ const VideoStreamCard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const imageRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const handleImageLoad = () => {
-      setLoading(false);
-      setError(null);
+      if (isMountedRef.current) {
+        setLoading(false);
+        setError(null);
+      }
     };
 
     const handleImageError = () => {
-      setLoading(false);
-      setError("Unable to connect to video stream. Make sure the Jetson Nano is running.");
+      if (isMountedRef.current) {
+        setLoading(false);
+        setError("Unable to connect to video stream. Make sure the Jetson Nano is running.");
+      }
     };
 
     const img = imageRef.current;
@@ -23,10 +30,15 @@ const VideoStreamCard = () => {
       img.addEventListener("error", handleImageError);
 
       return () => {
+        isMountedRef.current = false;
         img.removeEventListener("load", handleImageLoad);
         img.removeEventListener("error", handleImageError);
       };
     }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   return (
