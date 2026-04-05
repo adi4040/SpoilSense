@@ -46,4 +46,19 @@ export const getAvailablePorts = async () => {
   const res = await api.get("/config/ports");
   return res.data;
 };
-
+
+// ── Jetson Nano API ──────────────────────────────────────────────────────────
+
+export const getJetsonResult = async () => {
+  try {
+    const response = await fetch("https://6fd7-152-58-30-125.ngrok-free.app/result");
+    if (!response.ok) {
+      throw new Error(`Jetson API error: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Failed to fetch Jetson Nano result:", error);
+    throw error;
+  }
+};
+
