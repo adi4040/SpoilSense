@@ -20,3 +20,15 @@ class SensorResponse(BaseModel):
     humidity: Optional[float] = None
     co2_avg:  Optional[float] = None  # average over current buffer
 
+
+class DeviceConfigResponse(BaseModel):
+    port:           str
+    baud:           int
+    auto_reconnect: bool
+    manual_disconnect: bool = False
+
+
+class DeviceConfigUpdate(BaseModel):
+    port:           Optional[str]  = None
+    baud:           Optional[int]  = None
+    auto_reconnect: Optional[bool] = None

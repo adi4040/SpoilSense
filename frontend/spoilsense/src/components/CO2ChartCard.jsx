@@ -32,7 +32,9 @@ function getColorProfile(key, value) {
     return "red";
   }
   return "neutral";
+
 }
+
 
 const PALETTE = {
   green:   { stroke: "#22d3a0", gradStart: "rgba(34,211,160,0.35)", gradEnd: "rgba(34,211,160,0)",  glow: "0 0 18px rgba(34,211,160,0.45)" },
@@ -82,9 +84,10 @@ export default function CO2ChartCard({ title, dataKey, unit, series, description
   const pct         = pctChange(series, dataKey);
   const pctUp       = pct !== null && parseFloat(pct) > 0;
   const gradId      = `grad-${dataKey}`;
+  const visibleData = series.slice(-100);
 
   // Thin the x-axis labels for readability
-  const tickInterval = Math.max(1, Math.floor((series.length - 1) / 5));
+  const tickInterval = Math.max(1, Math.floor((visibleData.length - 1) / 5));
 
   return (
     <div
@@ -135,7 +138,7 @@ export default function CO2ChartCard({ title, dataKey, unit, series, description
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={series} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <AreaChart data={visibleData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor={palette.stroke} stopOpacity={0.4} />
