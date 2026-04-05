@@ -1,6 +1,7 @@
 import DashboardLayout from "../layouts/DashboardLayout";
 import StatusCard from "../components/StatusCard";
 import SpoilageCard from "../components/SpoilageCard";
+import SensorCard from "../components/SensorCard";
 
 const Dashboard = () => {
   return (
@@ -19,7 +20,7 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-gradient-to-br from-blue-500/20 via-indigo-500/10 to-transparent backdrop-blur-lg border border-blue-400/20 rounded-2xl text-white p-6 hover:from-blue-500/30 transition duration-300 cursor-pointer">
-          Coming soon
+          <SensorCard />
         </div>
       </div>
     </DashboardLayout>

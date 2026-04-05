@@ -14,3 +14,8 @@ export const resetDevice = async () => {
   const res = await api.post("/reset");
   return res.data;
 };
+
+export const getSensors = async () => {
+  const res = await api.get("/sensors");
+  return res.data;
+};
