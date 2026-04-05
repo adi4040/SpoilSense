@@ -51,7 +51,7 @@ export const getAvailablePorts = async () => {
 
 export const getJetsonResult = async () => {
   try {
-    const response = await fetch("https://6fd7-152-58-30-125.ngrok-free.app/result");
+    const response = await fetch("https://7248-152-58-30-125.ngrok-free.app/result");
     if (!response.ok) {
       throw new Error(`Jetson API error: ${response.status}`);
     }

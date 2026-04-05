@@ -12,29 +12,45 @@ const CombinedSpoilageCard = () => {
   const fetchCombinedData = async () => {
     setError(null);
     try {
-      // Fetch from both APIs in parallel
-      const [backendRes, jetsonRes] = await Promise.all([
-        getPrediction(),
-        getJetsonResult(),
-      ]);
+      // Fetch backend data (required)
+      let backendRes;
+      try {
+        backendRes = await getPrediction();
+      } catch (err) {
+        console.error("Backend prediction failed:", err);
+        throw new Error("Unable to fetch backend spoilage data");
+      }
+
+      // Fetch Jetson data (optional - if it fails, use fallback)
+      let jetsonRes = null;
+      try {
+        jetsonRes = await getJetsonResult();
+      } catch (err) {
+        console.warn("Jetson Nano disconnected or unreachable:", err);
+        jetsonRes = null;
+      }
 
       // Extract spoilage indices
       const backendIndex = backendRes.spoilage_index || 0;
 
-      // Jetson: overripe + rotten probability
-      const jetsonSpoilageIndex =
-        ((jetsonRes.probs?.overripe || 0) + (jetsonRes.probs?.rotten || 0)) / 100;
+      // Jetson: overripe + rotten probability (or 0 if unavailable)
+      const jetsonSpoilageIndex = jetsonRes
+        ? ((jetsonRes.probs?.overripe || 0) + (jetsonRes.probs?.rotten || 0)) / 100
+        : 0;
 
-      // Average the two indices
-      const averagedIndex = (backendIndex + jetsonSpoilageIndex) / 2;
+      // Average the two indices (if only backend is available, use backend only)
+      const averagedIndex = jetsonRes
+        ? (backendIndex + jetsonSpoilageIndex) / 2
+        : backendIndex;
 
       const newData = {
         backendIndex: parseFloat(backendIndex.toFixed(3)),
         jetsonIndex: parseFloat(jetsonSpoilageIndex.toFixed(3)),
         averagedIndex: parseFloat(averagedIndex.toFixed(3)),
-        jetsonLabel: jetsonRes.label || "unknown",
-        jetsonConfidence: jetsonRes.confidence || 0,
-        advice: jetsonRes.advice || "",
+        jetsonLabel: jetsonRes?.label || "unavailable",
+        jetsonConfidence: jetsonRes?.confidence || 0,
+        advice: jetsonRes?.advice || "",
+        jetsonConnected: !!jetsonRes,
       };
 
       // Only update if data actually changed
@@ -50,7 +66,7 @@ const CombinedSpoilageCard = () => {
       }
     } catch (err) {
       console.error("Error fetching combined spoilage data:", err);
-      setError("Unable to fetch spoilage data from one or both sources.");
+      setError(err.message || "Unable to fetch spoilage data from backend.");
       if (hasInitialized.current === false) {
         setLoading(false);
         hasInitialized.current = true;
@@ -128,29 +144,48 @@ const CombinedSpoilageCard = () => {
           <p className="text-gray-500 text-xs mt-1">Sensor-based</p>
         </div>
 
-        {/* Jetson spoilage */}
-        <div className="bg-purple-500/5 border border-purple-400/20 rounded-lg p-3">
+        {/* Jetson spoilage or unavailable */}
+        <div className={`${data.jetsonConnected ? "bg-purple-500/5 border border-purple-400/20" : "bg-red-500/5 border border-red-400/20"} rounded-lg p-3`}>
           <p className="text-gray-400 text-xs mb-2">Jetson Index</p>
-          <p className="text-purple-300 text-lg font-semibold">{(data.jetsonIndex * 100).toFixed(1)}%</p>
-          <p className="text-gray-500 text-xs mt-1">Overripe + Rotten</p>
+          <p className={`text-lg font-semibold ${data.jetsonConnected ? "text-purple-300" : "text-red-300"}`}>
+            {data.jetsonConnected ? `${(data.jetsonIndex * 100).toFixed(1)}%` : "—"}
+          </p>
+          <p className="text-gray-500 text-xs mt-1">
+            {data.jetsonConnected ? "Overripe + Rotten" : "Disconnected"}
+          </p>
         </div>
       </div>
 
       {/* Jetson detailed info */}
       <div className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-xs">Jetson Label</span>
-          <span className="text-white text-sm font-semibold capitalize">{data.jetsonLabel}</span>
+          <span className="text-gray-400 text-xs">Jetson Status</span>
+          <span className={`text-sm font-semibold ${data.jetsonConnected ? "text-green-300" : "text-red-300"}`}>
+            {data.jetsonConnected ? "Connected" : "Disconnected"}
+          </span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-gray-400 text-xs">Confidence</span>
-          <span className="text-white text-sm font-semibold">{data.jetsonConfidence.toFixed(2)}%</span>
-        </div>
-        {data.advice && (
-          <div className="flex items-start gap-2 pt-2 border-t border-white/5">
-            <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-            <p className="text-gray-300 text-xs">{data.advice}</p>
-          </div>
+        
+        {data.jetsonConnected && (
+          <>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Label</span>
+              <span className="text-white text-sm font-semibold capitalize">{data.jetsonLabel}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-xs">Confidence</span>
+              <span className="text-white text-sm font-semibold">{data.jetsonConfidence.toFixed(2)}%</span>
+            </div>
+            {data.advice && (
+              <div className="flex items-start gap-2 pt-2 border-t border-white/5">
+                <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                <p className="text-gray-300 text-xs">{data.advice}</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {!data.jetsonConnected && (
+          <p className="text-yellow-300 text-xs pt-1">Using backend sensor data only</p>
         )}
       </div>
     </div>

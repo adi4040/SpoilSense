@@ -52,7 +52,7 @@ const VideoStreamCard = () => {
 
           <img
             ref={imageRef}
-            src="https://6fd7-152-58-30-125.ngrok-free.app/stream"
+            src="https://7248-152-58-30-125.ngrok-free.app/stream"
             alt="Live video stream from Jetson Nano"
             className="w-full h-full object-contain"
             style={{ display: loading || error ? "none" : "block" }}
