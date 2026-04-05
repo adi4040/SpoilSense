@@ -12,6 +12,7 @@ const SpoilageCard = () => {
         setData(res);
         setErrorMsg(null); // clear any previous error once data arrives
       } catch (err) {
+        setData(null);
         const detail = err?.response?.data?.detail;
         if (detail) {
           setErrorMsg(detail); // e.g. "Not enough data: 12/30 readings collected."
@@ -44,7 +45,7 @@ const SpoilageCard = () => {
       <div className="space-y-2">
         <h2 className="text-lg font-semibold mb-3">Spoilage Status</h2>
         <div className="flex items-start gap-2 bg-yellow-500/10 border border-yellow-400/20 rounded-xl p-3">
-          <span className="text-yellow-400 text-lg mt-0.5">⏳</span>
+          <span className="text-yellow-400 text-lg mt-0.5"></span>
           <p className="text-yellow-300 text-sm leading-relaxed">{errorMsg}</p>
         </div>
         <p className="text-gray-500 text-xs">Collecting sensor readings, please wait...</p>

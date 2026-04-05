@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useRef, useState } from "react";
 import {
-  PlugZap, Wifi, WifiOff, RefreshCw, ChevronDown, RotateCcw, Save,
+  PlugZap, Wifi, WifiOff, RefreshCw, ChevronDown, RotateCcw, Save, Terminal
 } from "lucide-react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import {
@@ -179,6 +179,7 @@ export default function SettingsPage() {
   const [baud,          setBaud]          = useState(115200);
   const [autoReconnect, setAutoReconnect] = useState(true);
   const [manualDiscon,  setManualDiscon]  = useState(false);
+  const [jetsonConfig,  setJetsonConfig]  = useState("");
 
   // UX state
   const [ports,       setPorts]       = useState([]);
@@ -484,6 +485,31 @@ export default function SettingsPage() {
             label="Auto-Reconnect"
             description="Automatically retry when the device disconnects unexpectedly"
           />
+        </div>
+
+        {/* ════════════════════════════════════════════════
+            Card 3 — Jetson Nano Configuration
+        ════════════════════════════════════════════════ */}
+        <div className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 xl:col-span-2">
+          <SectionHeader
+            icon={<Terminal size={18} />}
+            title="Jetson Nano Config"
+            subtitle="Custom input variable for backend task configuration"
+          />
+
+          <div>
+            <FieldLabel>Configuration Input</FieldLabel>
+            <input
+              type="text"
+              value={jetsonConfig}
+              onChange={(e) => {
+                setJetsonConfig(e.target.value);
+                setDirty(true);
+              }}
+              placeholder="Enter config parameters here..."
+              className="w-full bg-[#111315]/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all duration-200"
+            />
+          </div>
         </div>
 
       </div>
