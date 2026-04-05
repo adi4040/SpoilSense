@@ -12,3 +12,11 @@ class StatusResponse(BaseModel):
 class PredictionResponse(BaseModel):
     label:          str
     spoilage_index: float
+
+
+class SensorResponse(BaseModel):
+    temp:     Optional[float] = None
+    co2:      Optional[float] = None
+    humidity: Optional[float] = None
+    co2_avg:  Optional[float] = None  # average over current buffer
+
