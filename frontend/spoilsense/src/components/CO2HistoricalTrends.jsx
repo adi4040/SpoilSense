@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LineChart, Line, CartesianGrid, Tooltip, XAxis, YAxis, ResponsiveContainer, Legend } from "recharts";
-import { AlertCircle, TrendingUp, Calendar, Clock } from "lucide-react";
+import { AlertCircle, TrendingUp, Calendar, Clock, Download, Loader } from "lucide-react";
 import api from "../services/api";
 
 /**
@@ -13,6 +13,8 @@ const CO2HistoricalTrends = () => {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(null);
   const [timeRange, setTimeRange] = useState("2h"); // Default: last 2 hours
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
 
   const timeRangeOptions = [
     { value: "2h", label: "Last 2 Hours", hours: 2 },
@@ -68,6 +70,39 @@ const CO2HistoricalTrends = () => {
       setError("Unable to fetch historical trend data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadPDF = async () => {
+    try {
+      setDownloadingPDF(true);
+      setDownloadError(null);
+
+      // Get hours from current time range
+      const hoursOption = timeRangeOptions.find(opt => opt.value === timeRange);
+      const hours = hoursOption?.hours || 2;
+
+      // Fetch PDF from backend
+      const response = await api.get(`/analytics/export/pdf?hours=${hours}`, {
+        responseType: 'blob'
+      });
+
+      // Create blob URL and trigger download
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', `SpoilSense_Report_${hoursOption?.label.replace(' ', '_')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+      console.log("✓ PDF downloaded successfully");
+    } catch (err) {
+      console.error("Failed to download PDF:", err);
+      setDownloadError("Unable to generate PDF report");
+    } finally {
+      setDownloadingPDF(false);
     }
   };
 
@@ -154,7 +189,41 @@ const CO2HistoricalTrends = () => {
               </button>
             ))}
           </div>
+
+          {/* PDF Export Button */}
+          <div className="ml-auto">
+            <button
+              onClick={downloadPDF}
+              disabled={downloadingPDF || data.length === 0}
+              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+                downloadingPDF || data.length === 0
+                  ? "bg-gray-500/20 text-gray-400 border border-gray-500/20 cursor-not-allowed"
+                  : "bg-blue-500/20 text-blue-300 border border-blue-400/30 hover:bg-blue-500/30 hover:border-blue-400/50"
+              }`}
+              title={data.length === 0 ? "No data available for export" : "Download analytics report as PDF"}
+            >
+              {downloadingPDF ? (
+                <>
+                  <Loader className="w-3 h-3 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-3 h-3" />
+                  Export PDF
+                </>
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Download Error Message */}
+        {downloadError && (
+          <div className="flex items-center gap-2 bg-red-500/10 border border-red-400/20 rounded-lg p-2">
+            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+            <p className="text-xs text-red-300">{downloadError}</p>
+          </div>
+        )}
       </div>
 
       {/* Statistics Summary */}

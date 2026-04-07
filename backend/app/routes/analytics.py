@@ -4,10 +4,16 @@ Exposes endpoints to retrieve historical sensor data for analytics/trends visual
 """
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from pathlib import Path
 from app.core.data_logger import get_latest_data, get_sensor_data_count, get_csv_file_path, get_data_by_timerange
+from app.services.pdf_generator import generate_analytics_pdf
+import io
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -190,3 +196,66 @@ def get_data_by_timerange_endpoint(hours: Optional[int] = Query(2, ge=1, le=720)
         raise HTTPException(status_code=400, detail=f"Invalid time range: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve time-range data: {str(e)}")
+
+
+@router.get("/export/pdf")
+def export_analytics_pdf(hours: Optional[int] = Query(2, ge=1, le=720)):
+    """
+    Generate and download a PDF report with analytics data and charts.
+    
+    Args:
+        hours: Number of hours to include in the report (default: 2, max: 720 = 30 days)
+        
+    Returns:
+        PDF file as binary stream
+    """
+    try:
+        # Get data for the specified time range
+        raw_data = get_data_by_timerange(hours)
+        
+        if not raw_data:
+            raise HTTPException(status_code=404, detail=f"No data available for the last {hours} hours")
+        
+        # Get statistics
+        temps = [float(row["Temperature"]) for row in raw_data if row.get("Temperature")]
+        hums = [float(row["Humidity"]) for row in raw_data if row.get("Humidity")]
+        co2s = [float(row["CO2"]) for row in raw_data if row.get("CO2")]
+        
+        stats = {
+            "total_points": len(raw_data),
+            "temperature_avg": round(sum(temps) / len(temps), 2) if temps else None,
+            "temperature_min": round(min(temps), 2) if temps else None,
+            "temperature_max": round(max(temps), 2) if temps else None,
+            "humidity_avg": round(sum(hums) / len(hums), 2) if hums else None,
+            "humidity_min": round(min(hums), 2) if hums else None,
+            "humidity_max": round(max(hums), 2) if hums else None,
+            "co2_avg": round(sum(co2s) / len(co2s), 2) if co2s else None,
+            "co2_min": round(min(co2s), 2) if co2s else None,
+            "co2_max": round(max(co2s), 2) if co2s else None,
+        }
+        
+        # Determine time range label
+        time_range_labels = {
+            1: "Last 1 Hour",
+            2: "Last 2 Hours",
+            5: "Last 5 Hours",
+            12: "Last 12 Hours",
+            24: "Last 24 Hours",
+        }
+        time_range_label = time_range_labels.get(hours, f"Last {hours} Hours")
+        
+        # Generate PDF
+        pdf_content = generate_analytics_pdf(raw_data, stats, time_range_label)
+        
+        # Return as downloadable file
+        return StreamingResponse(
+            io.BytesIO(pdf_content),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"attachment; filename=SpoilSense_Report_{time_range_label.replace(' ', '_')}.pdf"}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"✗ Failed to generate PDF report: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to generate PDF: {str(e)}")
