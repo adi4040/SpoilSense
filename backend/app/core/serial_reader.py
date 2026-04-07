@@ -120,8 +120,11 @@ def _read_loop(ser: serial.Serial) -> None:
             continue
 
         append_reading(co2, humidity, temp)
-        log_sensor_data(temp, humidity, co2)
-        logger.info("[DATA] CO2=%.2f  HUM=%.2f  TEMP=%.2f", co2, humidity, temp)
+        log_result = log_sensor_data(temp, humidity, co2)
+        if log_result:
+            logger.info("✓ [DATA] CO2=%.2f  HUM=%.2f  TEMP=%.2f  [Logged to CSV]", co2, humidity, temp)
+        else:
+            logger.warning("⚠ [DATA] CO2=%.2f  HUM=%.2f  TEMP=%.2f  [CSV log failed!]", co2, humidity, temp)
 
 
 # ── Outer reconnect loop ──────────────────────────────────────────────────────
