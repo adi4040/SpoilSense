@@ -1,12 +1,3 @@
-"""
-device_config.py
-~~~~~~~~~~~~~~~~
-Runtime-mutable device configuration.
-
-Unlike config.py (env-var snapshot at startup), this module holds the
-*live* port/baud/auto_reconnect settings that can be changed at runtime
-through the /config API without restarting the process.
-"""
 import threading
 import os
 from typing import Optional

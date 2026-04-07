@@ -9,6 +9,7 @@ from serial import SerialException
 from app.core.config import WARMUP_TIME
 from app.core.device_config import get_device_config
 from app.core.state import append_reading, get_snapshot, mark_connected, set_disconnected
+from app.core.data_logger import log_sensor_data
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,7 @@ def _read_loop(ser: serial.Serial) -> None:
             continue
 
         append_reading(co2, humidity, temp)
+        log_sensor_data(temp, humidity, co2)
         logger.info("[DATA] CO2=%.2f  HUM=%.2f  TEMP=%.2f", co2, humidity, temp)
 
 
