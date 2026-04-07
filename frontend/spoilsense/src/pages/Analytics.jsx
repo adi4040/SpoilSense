@@ -1,5 +1,6 @@
 import { useRealtimeData } from "../hooks/useRealtimeData";
 import CO2ChartCard from "../components/CO2ChartCard";
+import CO2HistoricalTrends from "../components/CO2HistoricalTrends";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 /* ── Top summary stat ── */
@@ -53,7 +54,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* ── Chart grid ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-8">
         <CO2ChartCard
           title="CO₂ Concentration"
           dataKey="co2"
@@ -76,6 +77,9 @@ export default function AnalyticsPage() {
           description="Sensor temperature · thresholds: 28 / 35 °C"
         />
       </div>
+
+      {/* ── Historical Trends Section ── */}
+      <CO2HistoricalTrends />
 
       {/* ── Empty state ── */}
       {series.length === 0 && !error && (
