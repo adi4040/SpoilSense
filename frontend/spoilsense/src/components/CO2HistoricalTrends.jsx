@@ -18,9 +18,14 @@ const CO2HistoricalTrends = () => {
 
   const timeRangeOptions = [
     { value: "2h", label: "Last 2 Hours", hours: 2 },
-    { value: "5h", label: "Last 5 Hours", hours: 5 },
     { value: "12h", label: "Last 12 Hours", hours: 12 },
     { value: "24h", label: "Last 24 Hours", hours: 24 },
+    { value: "2d", label: "Last 2 Days", hours: 48 },
+    { value: "3d", label: "Last 3 Days", hours: 72 },
+    { value: "4d", label: "Last 4 Days", hours: 96 },
+    { value: "5d", label: "Last 5 Days", hours: 120 },
+    { value: "10d", label: "Last 10 Days", hours: 240 },
+    { value: "30d", label: "Last 30 Days", hours: 720 },
     { value: "all", label: "All Data", hours: null },
   ];
 
