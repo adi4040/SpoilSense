@@ -1,6 +1,7 @@
 import { useRealtimeData } from "../hooks/useRealtimeData";
 import CO2ChartCard from "../components/CO2ChartCard";
 import CO2HistoricalTrends from "../components/CO2HistoricalTrends";
+import PredictionAnalytics from "../components/PredictionAnalytics";
 import DashboardLayout from "../layouts/DashboardLayout";
 
 /* ── Top summary stat ── */
@@ -80,6 +81,11 @@ export default function AnalyticsPage() {
 
       {/* ── Historical Trends Section ── */}
       <CO2HistoricalTrends />
+
+      {/* ── Prediction Analytics Section ── */}
+      <div className="mt-8">
+        <PredictionAnalytics />
+      </div>
 
       {/* ── Empty state ── */}
       {series.length === 0 && !error && (

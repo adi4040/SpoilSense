@@ -85,4 +85,8 @@ def predict(buffer: list) -> dict:
         final_index,
     )
 
-    return {"label": label, "spoilage_index": round(final_index, 3)}
+    return {
+        "label": label,
+        "spoilage_index": round(final_index, 3),
+        "confidence": round(ml_index, 3),  # ML model confidence
+    }

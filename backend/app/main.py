@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.serial_reader import get_stop_event, start_serial_listener
-from app.routes import prediction, reset, status, sensors, analytics
+from app.routes import prediction, reset, status, sensors, analytics, prediction_analytics
 from app.routes import config_route
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -59,6 +59,7 @@ app.include_router(prediction.router,    prefix="/predict", tags=["Prediction"])
 app.include_router(reset.router,         prefix="/reset",   tags=["Control"])
 app.include_router(sensors.router,       prefix="/sensors", tags=["Sensors"])
 app.include_router(analytics.router,     prefix="/analytics", tags=["Analytics"])
+app.include_router(prediction_analytics.router, prefix="/analytics", tags=["Analytics"])
 app.include_router(config_route.router,  prefix="/config",  tags=["Config"])
 
 

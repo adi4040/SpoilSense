@@ -62,3 +62,21 @@ export const getJetsonResult = async () => {
   }
 };
 
+// ── Log predictions to backend ────────────────────────────────────────────────
+
+export const logPredictionToBackend = async (source, label, spoilageIndex, confidence) => {
+  try {
+    const response = await api.post("/analytics/predictions/log", {
+      source,
+      label,
+      spoilage_index: spoilageIndex,
+      confidence,
+    });
+    return response.data;
+  } catch (error) {
+    console.warn(`Failed to log ${source} prediction to backend:`, error);
+    // Don't throw - this is a non-critical operation
+    return null;
+  }
+};
+

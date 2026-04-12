@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
-import { getPrediction, getJetsonResult } from "../services/spoilageService";
+import { getPrediction, getJetsonResult, logPredictionToBackend } from "../services/spoilageService";
 
 const CombinedSpoilageCard = () => {
   const [data, setData] = useState(null);
@@ -34,6 +34,16 @@ const CombinedSpoilageCard = () => {
       let jetsonRes = null;
       try {
         jetsonRes = await getJetsonResult();
+        // Log Jetson prediction to backend
+        if (jetsonRes) {
+          const jetsonSpoilageIndex = ((jetsonRes.probs?.overripe || 0) + (jetsonRes.probs?.rotten || 0)) / 100;
+          await logPredictionToBackend(
+            "jetson",
+            jetsonRes.label,
+            jetsonSpoilageIndex,
+            jetsonRes.confidence || 0
+          );
+        }
       } catch (err) {
         console.warn("Jetson Nano disconnected or unreachable:", err);
         jetsonRes = null;

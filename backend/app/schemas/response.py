@@ -12,6 +12,7 @@ class StatusResponse(BaseModel):
 class PredictionResponse(BaseModel):
     label:          str
     spoilage_index: float
+    confidence:     float = 0.0  # Model confidence (0-1 range)
 
 
 class SensorResponse(BaseModel):
