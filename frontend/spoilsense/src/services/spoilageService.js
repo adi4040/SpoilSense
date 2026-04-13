@@ -51,7 +51,12 @@ export const getAvailablePorts = async () => {
 
 export const getJetsonResult = async () => {
   try {
-    const response = await fetch("https://7248-152-58-30-125.ngrok-free.app/result");
+    const response = await fetch("https://stardust-reacquire-riverside.ngrok-free.dev/result", {
+      headers: {
+        "ngrok-skip-browser-warning": "true",
+        "ngrok-skip-iframe-browser-warning": "true",
+      },
+    });
     if (!response.ok) {
       throw new Error(`Jetson API error: ${response.status}`);
     }

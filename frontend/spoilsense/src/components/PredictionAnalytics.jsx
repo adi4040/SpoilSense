@@ -204,13 +204,6 @@ const PredictionAnalytics = () => {
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-xs text-gray-500">Confidence Avg</p>
-                <p className="text-lg font-bold text-blue-300">{backendStats.confidence_avg}</p>
-                <p className="text-xs text-gray-600">
-                  {backendStats.confidence_min} - {backendStats.confidence_max}
-                </p>
-              </div>
-              <div className="space-y-1">
                 <p className="text-xs text-gray-500">Total Predictions</p>
                 <p className="text-lg font-bold text-purple-300">{backendStats.total}</p>
               </div>
@@ -247,28 +240,7 @@ const PredictionAnalytics = () => {
             </div>
           </div>
 
-          {/* Backend Confidence Chart */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-white">Model Confidence</h4>
-            <div className="bg-black/20 rounded-lg p-4 h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={backendData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#111",
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      borderRadius: "8px",
-                    }}
-                    formatter={(value) => value.toFixed(3)}
-                  />
-                  <XAxis dataKey="timestamp" tick={{ fontSize: 12, fill: "#999" }} angle={-45} height={80} />
-                  <YAxis tick={{ fontSize: 12, fill: "#999" }} domain={[0, 1]} />
-                  <Bar dataKey="Confidence" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+
         </div>
       )}
 
@@ -276,7 +248,7 @@ const PredictionAnalytics = () => {
       {jetsonData.length > 0 && (
         <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-white">📷 Jetson Nano Predictions</h3>
+            <h3 className="text-base font-semibold text-white">Jetson Nano Predictions</h3>
             <span className="text-xs bg-orange-500/20 text-orange-300 px-2 py-1 rounded">
               {jetsonData.length} samples
             </span>
@@ -290,13 +262,6 @@ const PredictionAnalytics = () => {
                 <p className="text-lg font-bold text-emerald-300">{jetsonStats.spoilage_avg}</p>
                 <p className="text-xs text-gray-600">
                   {jetsonStats.spoilage_min} - {jetsonStats.spoilage_max}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-gray-500">Confidence Avg</p>
-                <p className="text-lg font-bold text-orange-300">{jetsonStats.confidence_avg}</p>
-                <p className="text-xs text-gray-600">
-                  {jetsonStats.confidence_min} - {jetsonStats.confidence_max}
                 </p>
               </div>
               <div className="space-y-1">
@@ -336,28 +301,7 @@ const PredictionAnalytics = () => {
             </div>
           </div>
 
-          {/* Jetson Confidence Chart */}
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold text-white">Model Confidence</h4>
-            <div className="bg-black/20 rounded-lg p-4 h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={jetsonData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#111",
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      borderRadius: "8px",
-                    }}
-                    formatter={(value) => value.toFixed(3)}
-                  />
-                  <XAxis dataKey="timestamp" tick={{ fontSize: 12, fill: "#999" }} angle={-45} height={80} />
-                  <YAxis tick={{ fontSize: 12, fill: "#999" }} domain={[0, 1]} />
-                  <Bar dataKey="Confidence" fill="#f97316" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+
         </div>
       )}
 

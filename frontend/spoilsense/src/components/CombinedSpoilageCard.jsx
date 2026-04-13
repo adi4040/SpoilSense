@@ -149,7 +149,7 @@ const CombinedSpoilageCard = () => {
       {/* Main averaged spoilage index */}
       <div className={`${colors.bg} border ${colors.border} rounded-lg p-4`}>
         <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-300 text-sm font-medium">Averaged Spoilage Index</span>
+          <span className="text-gray-300 text-sm font-medium">Virtual Sensor</span>
           <span className={`${colors.text} text-2xl font-bold`}>{(data.averagedIndex * 100).toFixed(1)}%</span>
         </div>
         <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
@@ -171,14 +171,14 @@ const CombinedSpoilageCard = () => {
       <div className="grid grid-cols-2 gap-3">
         {/* Backend spoilage */}
         <div className="bg-blue-500/5 border border-blue-400/20 rounded-lg p-3">
-          <p className="text-gray-400 text-xs mb-2">Backend Index</p>
+          <p className="text-gray-400 text-xs mb-2">Sensor 1 (Sensor Index)</p>
           <p className="text-blue-300 text-lg font-semibold">{(data.backendIndex * 100).toFixed(1)}%</p>
           <p className="text-gray-500 text-xs mt-1">Sensor-based</p>
         </div>
 
         {/* Jetson spoilage or unavailable */}
         <div className={`${data.jetsonConnected ? "bg-purple-500/5 border border-purple-400/20" : "bg-red-500/5 border border-red-400/20"} rounded-lg p-3`}>
-          <p className="text-gray-400 text-xs mb-2">Jetson Index</p>
+          <p className="text-gray-400 text-xs mb-2">Sensor 2 (Jetson Index)</p>
           <p className={`text-lg font-semibold ${data.jetsonConnected ? "text-purple-300" : "text-red-300"}`}>
             {data.jetsonConnected ? `${(data.jetsonIndex * 100).toFixed(1)}%` : "—"}
           </p>
@@ -207,12 +207,12 @@ const CombinedSpoilageCard = () => {
               <span className="text-gray-400 text-xs">Confidence</span>
               <span className="text-white text-sm font-semibold">{data.jetsonConfidence.toFixed(2)}%</span>
             </div>
-            {data.advice && (
+            {/* {data.advice && (
               <div className="flex items-start gap-2 pt-2 border-t border-white/5">
                 <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
                 <p className="text-gray-300 text-xs">{data.advice}</p>
               </div>
-            )}
+            )} */}
           </>
         )}
 

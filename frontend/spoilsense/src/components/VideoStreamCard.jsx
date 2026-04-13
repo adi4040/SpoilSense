@@ -4,37 +4,100 @@ import { AlertCircle, Loader } from "lucide-react";
 const VideoStreamCard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const imageRef = useRef(null);
+  const canvasRef = useRef(null);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
     isMountedRef.current = true;
 
-    const handleImageLoad = () => {
-      if (isMountedRef.current) {
-        setLoading(false);
-        setError(null);
+    const streamMJPEG = async () => {
+      try {
+        const response = await fetch(
+          "https://stardust-reacquire-riverside.ngrok-free.dev/stream",
+          {
+            headers: {
+              "ngrok-skip-browser-warning": "true",
+              "ngrok-skip-iframe-browser-warning": "true",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Stream error: ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+        let buffer = new Uint8Array(0);
+        const SOI = 0xffd8; // JPEG Start of Image
+        const EOI = 0xffd9; // JPEG End of Image
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (!isMountedRef.current) break;
+
+          // Append new data to buffer
+          const newBuffer = new Uint8Array(buffer.length + value.length);
+          newBuffer.set(buffer);
+          newBuffer.set(value, buffer.length);
+          buffer = newBuffer;
+
+          // Find JPEG frames (0xFFD8...0xFFD9)
+          let i = 0;
+          while (i < buffer.length - 1) {
+            if (buffer[i] === 0xff && buffer[i + 1] === 0xd8) {
+              // Found SOI, look for EOI
+              let j = i + 2;
+              while (j < buffer.length - 1) {
+                if (buffer[j] === 0xff && buffer[j + 1] === 0xd9) {
+                  // Found EOI
+                  const jpegData = buffer.slice(i, j + 2);
+                  const blob = new Blob([jpegData], { type: "image/jpeg" });
+                  const url = URL.createObjectURL(blob);
+
+                  const img = new Image();
+                  img.onload = () => {
+                    if (isMountedRef.current && canvasRef.current) {
+                      const canvas = canvasRef.current;
+                      const ctx = canvas.getContext("2d");
+                      canvas.width = img.width;
+                      canvas.height = img.height;
+                      ctx.drawImage(img, 0, 0);
+                      setLoading(false);
+                      setError(null);
+                    }
+                    URL.revokeObjectURL(url);
+                  };
+                  img.onerror = () => {
+                    console.error("Failed to load JPEG frame");
+                    URL.revokeObjectURL(url);
+                  };
+                  img.src = url;
+
+                  // Remove processed frame from buffer
+                  buffer = buffer.slice(j + 2);
+                  i = 0;
+                  break;
+                }
+                j++;
+              }
+              if (j < buffer.length - 1) continue;
+              i++;
+            } else {
+              i++;
+            }
+          }
+        }
+      } catch (err) {
+        if (isMountedRef.current) {
+          console.error("Stream error:", err);
+          setLoading(false);
+          setError("Unable to connect to video stream. Check if Jetson Nano is running and ngrok tunnel is active.");
+        }
       }
     };
 
-    const handleImageError = () => {
-      if (isMountedRef.current) {
-        setLoading(false);
-        setError("Unable to connect to video stream. Make sure the Jetson Nano is running.");
-      }
-    };
-
-    const img = imageRef.current;
-    if (img) {
-      img.addEventListener("load", handleImageLoad);
-      img.addEventListener("error", handleImageError);
-
-      return () => {
-        isMountedRef.current = false;
-        img.removeEventListener("load", handleImageLoad);
-        img.removeEventListener("error", handleImageError);
-      };
-    }
+    streamMJPEG();
 
     return () => {
       isMountedRef.current = false;
@@ -62,11 +125,9 @@ const VideoStreamCard = () => {
             </div>
           )}
 
-          <img
-            ref={imageRef}
-            src="https://7248-152-58-30-125.ngrok-free.app/stream"
-            alt="Live video stream from Jetson Nano"
-            className="w-full h-full object-contain"
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full object-contain bg-black"
             style={{ display: loading || error ? "none" : "block" }}
           />
         </div>

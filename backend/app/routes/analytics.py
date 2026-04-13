@@ -200,15 +200,7 @@ def get_data_by_timerange_endpoint(hours: Optional[int] = Query(2, ge=1, le=720)
 
 @router.get("/export/pdf")
 def export_analytics_pdf(hours: Optional[int] = Query(2, ge=1, le=720)):
-    """
-    Generate and download a PDF report with analytics data and charts.
-    
-    Args:
-        hours: Number of hours to include in the report (default: 2, max: 720 = 30 days)
-        
-    Returns:
-        PDF file as binary stream
-    """
+
     try:
         # Get data for the specified time range
         raw_data = get_data_by_timerange(hours)
